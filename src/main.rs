@@ -18,7 +18,7 @@ fn main() {
     let opengl = OpenGL::V3_2;
 
     // Create an Glutin window.
-    let mut window: Window = WindowSettings::new("spinning-square", [200, 200])
+    let mut window: Window = WindowSettings::new("spinning-square", [500, 500])
         .graphics_api(opengl)
         .exit_on_esc(true)
         .build()
