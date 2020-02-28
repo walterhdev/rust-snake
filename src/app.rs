@@ -40,6 +40,7 @@ impl App {
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
             clear(BLACK, gl);
+
             let transform = c
                 .transform
                 .trans(x, y)
@@ -48,6 +49,10 @@ impl App {
 
             // Draw a box rotating around the middle of the screen.
             rectangle(RED, fruit, transform, gl);
+
+            for i in 0..self.snake.body.len() {
+                rectangle(RED, self.snake.body[i], transform, gl);
+            }
         });
     }
 
