@@ -10,6 +10,7 @@ use piston::input::{RenderEvent, UpdateEvent};
 use piston::window::WindowSettings;
 
 mod app;
+mod snake;
 
 use crate::app::*;
 
