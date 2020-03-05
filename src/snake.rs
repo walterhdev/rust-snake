@@ -1,4 +1,4 @@
-use graphics::*;
+use piston_window::*;
 
 pub struct Snake {
     pub body: Vec<SnakeDot>,
@@ -8,7 +8,7 @@ pub struct Snake {
 pub struct SnakeDot {
     pub x: f64,
     pub y: f64,
-    pub dot: [f64; 4],
+    pub dot: types::Rectangle,
 }
 
 const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
