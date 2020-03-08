@@ -1,6 +1,7 @@
 extern crate rand;
+extern crate find_folder;
 
-use crate::snake::Snake;
+use crate::snake::{Snake, SnakeDirection};
 use piston_window::*;
 use rand::rngs::ThreadRng;
 use rand::Rng;
@@ -22,58 +23,77 @@ pub struct Fruit {
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 const GREEN: [f32; 4] = [1.0, 0.0, 1.0, 1.0];
-const MOVEMENT_DETAIL: f64 = 20_f64;
+const FRUIT_SIZE: f64 = 15.0;
 
 impl Fruit {
     pub fn update(&mut self) {
         // let's pretend square is the fruit
-        self.x = self.randomizer.gen_range(0_f64, self.window_x);
-        self.y = self.randomizer.gen_range(0_f64, self.window_y);
+        self.x = self.randomizer.gen_range(0_f64, self.window_x - FRUIT_SIZE);
+        self.y = self.randomizer.gen_range(0_f64, self.window_y - FRUIT_SIZE);
     }
 }
 
 impl App {
     pub fn new(window: PistonWindow) -> Self {
         let window_d = &window.size();
+        let mut fruit = Fruit {
+            x: 0_f64,
+            y: 0_f64,
+            window_x: window_d.width,
+            window_y: window_d.height,
+            randomizer: rand::thread_rng(),
+        };
+        fruit.update();
+
         App {
             window,
             snake: Snake::new(0_f64, 0_f64),
-            fruit: Fruit {
-                x: 0_f64,
-                y: 0_f64,
-                window_x: window_d.width,
-                window_y: window_d.height,
-                randomizer: rand::thread_rng(),
-            },
+            fruit: fruit,
         }
     }
 
     pub fn start(&mut self) {
+        let assets = find_folder::Search::ParentsThenKids(3, 3)
+            .for_folder("assets")
+            .unwrap();
+        println!("Loaded assets {:?}", assets);
+        let mut glyphs = self.window
+            .load_font(assets.join("FiraSans-Regular.ttf"))
+            .unwrap();
+
         while let Some(e) = self.window.next() {
             let snake = &mut self.snake;
-            let snake_body = &snake.body;
-
             let fruit_d = &mut self.fruit;
-            match snake_body.first() {
-                Some(dot) => {
-                    if (dot.x - fruit_d.x).abs() < 15_f64 && (dot.y - fruit_d.y).abs() < 15_f64 {
-                        fruit_d.update()
-                    }
-                }
-                None => {}
+            if snake.die(fruit_d.window_x, fruit_d.window_y) {
+                self.window.draw_2d(&e, |c, gl, device| {
+                    // Clear the screen.
+                    clear(BLACK, gl);
+                    let x = fruit_d.window_x / 2.0 - 80.0;
+                    let y = fruit_d.window_y / 2.0;
+                    text(RED, 30, "Game Over", &mut glyphs, c.transform.trans(x, y), gl).unwrap();
+                    
+                    glyphs.factory.encoder.flush(device);
+                });
+                continue;
             }
 
-            let fruit = rectangle::square(0.0, 0.0, 15.0);
+            if snake.collide(fruit_d.x, fruit_d.y) {
+                snake.eat();
+                fruit_d.update();
+            }
+
+            let fruit = rectangle::square(0.0, 0.0, FRUIT_SIZE);
+
 
             self.window.draw_2d(&e, |c, gl, _| {
-                // generate random x y for fruit
-
                 // Clear the screen.
                 clear(BLACK, gl);
 
                 // Draw a box rotating around the middle of the screen.
                 rectangle(GREEN, fruit, c.transform.trans(fruit_d.x, fruit_d.y), gl);
             });
+
+            let snake_body = &snake.body;
 
             self.window.draw_2d(&e, |c, gl, _| {
                 for i in 0..snake_body.len() {
@@ -84,24 +104,24 @@ impl App {
                 }
             });
 
+            if let Some(_) = e.update_args() {
+                snake.move_d();
+            }
+
             if let Some(Button::Keyboard(Key::Left)) = e.press_args() {
-                // update snake
-                snake.move_d(-MOVEMENT_DETAIL, 0_f64)
+                snake.update_direction(SnakeDirection::Left)
             }
 
             if let Some(Button::Keyboard(Key::Right)) = e.press_args() {
-                // update snake
-                snake.move_d(MOVEMENT_DETAIL, 0_f64)
+                snake.update_direction(SnakeDirection::Right)
             }
 
             if let Some(Button::Keyboard(Key::Up)) = e.press_args() {
-                // update snake
-                snake.move_d(0_f64, -MOVEMENT_DETAIL)
+                snake.update_direction(SnakeDirection::Up)
             }
 
             if let Some(Button::Keyboard(Key::Down)) = e.press_args() {
-                // update snake
-                snake.move_d(0_f64, MOVEMENT_DETAIL)
+                snake.update_direction(SnakeDirection::Down)
             }
         }
     }

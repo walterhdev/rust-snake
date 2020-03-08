@@ -16,8 +16,7 @@ fn main() {
         .graphics_api(opengl)
         .build()
         .unwrap();
-    window.set_lazy(true);
-
+    window.set_ups(8);
     // Create a new game and run it.
     let mut app = App::new(window);
     app.start();
