@@ -11,7 +11,7 @@ fn main() {
     // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
 
-    let window: PistonWindow = WindowSettings::new("snake", [500; 2])
+    let mut window: PistonWindow = WindowSettings::new("snake", [500; 2])
         .exit_on_esc(true)
         .graphics_api(opengl)
         .build()
@@ -20,8 +20,5 @@ fn main() {
 
     // Create a new game and run it.
     let mut app = App::new(window, 0.0);
-
-    while let Some(e) = window.next() {
-        app.render(&e);
-    }
+    app.start();
 }
