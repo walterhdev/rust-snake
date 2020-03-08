@@ -43,16 +43,14 @@ impl App {
 
                 // Draw a box rotating around the middle of the screen.
                 rectangle(RED, fruit, c.transform.trans(x, y), gl);
+            });
 
-                /*
-                for i in 0..self.snake.body.len() {
+            let snake_body = &self.snake.body;
+            self.window.draw_2d(&e, |c, gl, _| {
+                for i in 0..snake_body.len() {
                     // generate random x y for fruit
-                    let x = self.randomizer.gen_range(0_f64, self.window.size().width);
-                    let y = self.randomizer.gen_range(0_f64, self.window.size().height);
-                    let transform = c.transform.trans(x, y);
-                    rectangle(RED, self.snake.body[i].dot, transform, gl);
+                    rectangle(RED, snake_body[i].dot, c.transform, gl);
                 }
-                */
             });
         }
     }
