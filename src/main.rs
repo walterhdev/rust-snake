@@ -19,6 +19,6 @@ fn main() {
     window.set_lazy(true);
 
     // Create a new game and run it.
-    let mut app = App::new(window, 0.0);
+    let mut app = App::new(window);
     app.start();
 }
