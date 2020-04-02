@@ -1,5 +1,6 @@
-extern crate rand;
 extern crate find_folder;
+extern crate piston_window;
+extern crate rand;
 
 use crate::snake::{Snake, SnakeDirection};
 use piston_window::*;
@@ -48,7 +49,7 @@ impl App {
         App {
             window,
             snake: Snake::new(0_f64, 0_f64),
-            fruit: fruit,
+            fruit,
         }
     }
 
@@ -57,7 +58,8 @@ impl App {
             .for_folder("assets")
             .unwrap();
         println!("Loaded assets {:?}", assets);
-        let mut glyphs = self.window
+        let mut glyphs = self
+            .window
             .load_font(assets.join("FiraSans-Regular.ttf"))
             .unwrap();
 
@@ -70,8 +72,16 @@ impl App {
                     clear(BLACK, gl);
                     let x = fruit_d.window_x / 2.0 - 80.0;
                     let y = fruit_d.window_y / 2.0;
-                    text(RED, 30, "Game Over", &mut glyphs, c.transform.trans(x, y), gl).unwrap();
-                    
+                    text(
+                        RED,
+                        30,
+                        "Game Over",
+                        &mut glyphs,
+                        c.transform.trans(x, y),
+                        gl,
+                    )
+                    .unwrap();
+
                     glyphs.factory.encoder.flush(device);
                 });
                 continue;
@@ -83,7 +93,6 @@ impl App {
             }
 
             let fruit = rectangle::square(0.0, 0.0, FRUIT_SIZE);
-
 
             self.window.draw_2d(&e, |c, gl, _| {
                 // Clear the screen.
