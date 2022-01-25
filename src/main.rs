@@ -16,6 +16,6 @@ fn main() {
         .unwrap();
     window.set_ups(8);
     // Create a new game and run it.
-    let mut app = App::new(window);
+    let mut app = App::new(window, 8);
     app.start();
 }

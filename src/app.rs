@@ -11,6 +11,7 @@ pub struct App {
     window: PistonWindow, // OpenGL drawing backend.
     snake: Snake,
     fruit: Fruit,
+    speed: u64,
 }
 
 pub struct Fruit {
@@ -29,28 +30,58 @@ const FRUIT_SIZE: f64 = 15.0;
 impl Fruit {
     pub fn update(&mut self) {
         // let's pretend square is the fruit
-        self.x = self.randomizer.gen_range(0_f64, self.window_x - FRUIT_SIZE);
-        self.y = self.randomizer.gen_range(0_f64, self.window_y - FRUIT_SIZE);
+        self.x = self.randomizer.gen_range(0_f64..self.window_x - FRUIT_SIZE);
+        self.y = self.randomizer.gen_range(0_f64..self.window_y - FRUIT_SIZE);
     }
 }
 
 impl App {
-    pub fn new(window: PistonWindow) -> Self {
-        let window_d = &window.size();
+    pub fn new_fruit(w: f64, h: f64) -> Fruit {
         let mut fruit = Fruit {
             x: 0_f64,
             y: 0_f64,
-            window_x: window_d.width,
-            window_y: window_d.height,
+            window_x: w,
+            window_y: h,
             randomizer: rand::thread_rng(),
         };
         fruit.update();
+        return fruit;
+    }
 
+    pub fn new_snake() -> Snake {
+        return Snake::new(0_f64, 0_f64);
+    }
+
+    pub fn new(window: PistonWindow, speed: u64) -> Self {
+        let window_d = &window.size();
+        let fruit = App::new_fruit(window_d.width, window_d.height);
         App {
             window,
-            snake: Snake::new(0_f64, 0_f64),
+            snake: App::new_snake(),
             fruit,
+            speed,
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.fruit = App::new_fruit(self.window.size().width, self.window.size().height);
+        self.snake = App::new_snake();
+    }
+
+    pub fn increase_speed(&mut self) {
+        self.speed += 2;
+        self.update_speed();
+    }
+
+    pub fn decrease_speed(&mut self) {
+        if self.speed > 2 {
+            self.speed -= 2;
+        }
+        self.update_speed();
+    }
+
+    pub fn update_speed(&mut self) {
+        self.window.set_ups(self.speed)
     }
 
     pub fn start(&mut self) {
@@ -64,8 +95,13 @@ impl App {
             .unwrap();
 
         while let Some(e) = self.window.next() {
+            if let Some(Button::Keyboard(Key::R)) = e.press_args() {
+                self.reset();
+            }
+
             let snake = &mut self.snake;
             let fruit_d = &mut self.fruit;
+
             if snake.die(fruit_d.window_x, fruit_d.window_y) {
                 self.window.draw_2d(&e, |c, gl, device| {
                     // Clear the screen.
@@ -118,19 +154,27 @@ impl App {
             }
 
             if let Some(Button::Keyboard(Key::Left)) = e.press_args() {
-                snake.update_direction(SnakeDirection::Left)
+                snake.update_direction(SnakeDirection::Left);
             }
 
             if let Some(Button::Keyboard(Key::Right)) = e.press_args() {
-                snake.update_direction(SnakeDirection::Right)
+                snake.update_direction(SnakeDirection::Right);
             }
 
             if let Some(Button::Keyboard(Key::Up)) = e.press_args() {
-                snake.update_direction(SnakeDirection::Up)
+                snake.update_direction(SnakeDirection::Up);
             }
 
             if let Some(Button::Keyboard(Key::Down)) = e.press_args() {
-                snake.update_direction(SnakeDirection::Down)
+                snake.update_direction(SnakeDirection::Down);
+            }
+
+            if let Some(Button::Keyboard(Key::I)) = e.press_args() {
+                self.increase_speed();
+            }
+
+            if let Some(Button::Keyboard(Key::D)) = e.press_args() {
+                self.decrease_speed();
             }
         }
     }
